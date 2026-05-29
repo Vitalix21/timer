@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html, body, #app {
+    margin: 0;
+    padding: 0;
+    width: 320px;
+    height: 500px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+:root {
+
+    --bg-primary: #E8ECF0;
+    --bg-secondary: #FFFFFF;
+    --bg-toggle: #D9D9D9;
+    --bg-timer: #FFFFFF;
+    --bg-button: #0F172A;
+    --bg-toggle-active: #1E293B;
+    --toggle-pos: 1px;
+    --bg-play-btn: #D9D9D9;
+    --bg-primary-time: #B4AEAE;
+
+    --text-primary: #111827;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+
+    --toggle-track-off: #1E293B;
+    --toggle-track-on: #3B82F6;
+    --toggle-thumb: #FFFFFF;
+
+    --settings-card-bg: #D9D9D9;     /* Світлий фон карток */
+    --move-to-bg: #0F172A;
+    --settings-text: #111827;              /* Чорний текст */
+    --interval-default-bg: #E8ECF0;        /* Фон кнопок (невибрані) */
+    --interval-selected-bg: #B4AEAE;       /* Фон кнопок (вибрані) */
+
+    /* Toggles для Alerts (увімкнені) */
+    --toggle-alerts-on-bg: #8EBC78;             /* Зелений фон */
+    --toggle-alerts-off-bg: #FFFFFF;         /* білий фон */
+    --toggle-alerts-thumb: #000000;        /* Чорний thumb */
+    --toggle-alerts-pos: 32px;             /* Thumb праворуч */
+
+    /* Toggle для Auto-restart (вимкнений) */
+    --toggle-restart-on-bg: #BE9D9D;
+    --toggle-restart-off-bg: #FFFFFF;
+    --toggle-restart-pos: 2px;             /* Thumb ліворуч */
+}
+
+[data-theme="dark"] {
+
+    --bg-primary: #020617;
+    --bg-secondary: #0F172A;
+    --bg-toggle: #0F172A;
+    --bg-timer: #1E293B;
+    --text-secondary: #F1F5F9;
+    --bg-button: #1E293B;
+    --bg-toggle-active: #3B82F6;
+    --toggle-pos: 21px;
+    --bg-play-btn: #7D7272;
+    --bg-primary-time: #665C5C;
+
+    --text-primary: #F1F5F9;
+    --text-muted: #64748B;
+
+    --toggle-track-off: #334155;
+    --toggle-track-on: #3B82F6;
+    --toggle-thumb: #FFFFFF;
+
+    /* ✅ Нові variables для Settings екрану (темна тема) */
+    --move-to-bg: #1E293B;
+    --settings-card-bg: #1E293B;          /* Темно-сірий фон карток */
+    --settings-text: #FFFFFF;             /* Білий текст */
+    --interval-default-bg: #4B5563;       /* Темний фон кнопок (невибрані) */
+    --interval-selected-bg: #665C5C;      /* Темний фон кнопок (вибрані) */
+
+    /* Toggles для Alerts (увімкнені) - БЕЗ ЗМІН */
+    --toggle-alerts-on-bg: #8EBC78;      /* Зелений (БЕЗ ЗМІН) */
+    --toggle-alerts-off-bg: #FFFFFF;     /* Білий (БЕЗ ЗМІН) */
+    --toggle-alerts-thumb: #000000;       /* Чорний thumb */
+    --toggle-alerts-pos: 32px;            /* Праворуч */
+
+    /* Toggle для Auto-restart (вимкнений) */
+    --toggle-restart-on-bg: #FFFFFF;
+    --toggle-restart-off-bg: #BE9D9D;
+    --toggle-restart-pos: 2px;            /* Ліворуч */
+
+}
+
+*{
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .settings-icon {
+    filter: brightness(0) invert(1);
+}
+
+[data-theme="dark"] .alert-icon {
+    filter: brightness(0) invert(1);
+}

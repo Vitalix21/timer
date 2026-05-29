@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Eye Timer TS",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "description": "Pomodoro timer for eye health with break reminders",
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/popup/screens/breakScreen.ts"]
+    }
+  ],
+  "permissions": ["alarms", "notifications", "storage"]
+
+}
