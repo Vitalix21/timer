@@ -134,3 +134,21 @@ function showBreakScreen(isLightMode: boolean) {
         if (document.getElementById("e-timer-break-overlay")) cleanup();
     }, 20000);
 }
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+    if (request.action === "SHOW_BREAK_SCREEN") {
+        console.log("Показуємо виїжджаюче сповіщення на сторінці!");
+
+        // Тут твій код для малювання UI (попапу/toast)
+        // showCustomToast();
+
+        // Відтворюємо звук (якщо він не заблокований сторінкою)
+        // const audio = new Audio(chrome.runtime.getURL("alarm.mp3"));
+        // audio.play().catch(e => console.warn("Audio blocked", e));
+
+        // 🔴 ВАЖЛИВО: Кажемо бекграунду, що все окей, План Б не потрібен
+        sendResponse({ success: true });
+
+        // Повертаємо true, щоб Chrome знав, що sendResponse може бути асинхронним
+        return true;
+    }
+});
