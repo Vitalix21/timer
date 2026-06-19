@@ -8,12 +8,15 @@ import autoRestartOn from "../../assets/auto-restart-on.svg"
 import soundOn from "../../assets/sound-on.svg"
 import moveToMainUIIcon from "../../assets/move-to-main-UI-icon.svg"
 
-export function renderSettingsScreen(onNavigate: (screen: 'main') => void): void {
+export async function renderSettingsScreen(onNavigate: (screen: 'main') => void): Promise<void> {
     const app = document.querySelector<HTMLDivElement>("#app");
     if (!app) return;
 
-    // Завантажуємо збережений інтервал
-    const savedInterval = localStorage.getItem('workInterval') || '20';
+    const storage = await chrome.storage.local.get({workInterval:"20",alertSound:"on",autoRestart: "on"})
+    const savedInterval = String(storage.workInterval);
+    const isSoundOn = storage.alertSound;
+    const isRestartOn = storage.autoRestart;
+
 
     app.innerHTML = `
    <div class="${UI.uiWrapper} flex flex-col h-[500px] overflow-hidden">
@@ -49,26 +52,35 @@ export function renderSettingsScreen(onNavigate: (screen: 'main') => void): void
          <p class="text-[10px] text-center mt-[15px] mb-[15px]" style="font-weight: 600; font-size:13px; color: var(--text-primary);">Optimization</p>
            
            <!-- Sound Toggle (ввімкнений) -->
-           <div class ="flex justify-center w-full">
+           <div class="flex flex-row items-end justify-center gap-[5px]">
+      <div class ="flex justify-center w-full">
             <div class="flex flex-col items-center">
-            <p class="m-0" style="font-weight: 500; font-size: 13px; margin-right:5px; color: var(--text-primary);">Sound</p>
-             <img id="sound-icon" src="${soundOn}" class="alert-icon w-[24px] h-[24px] mb-[5px]"> 
-             <div id="toggle-sound" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" data-state="on" style="background: var(--toggle-alerts-on-bg); transition: background 0.3s;">
-              <div class="w-[17px] h-[17px] rounded-full absolute" style="background: var(--toggle-alerts-thumb); top: 1px; left: 34px; transition: left 0.3s;"></div>
+             <p class="m-0" style="font-weight: 500; font-size: 13px; margin-right:5px; color: var(--text-primary);margin-bottom:22px;">Sound</p>
+             
+             <img id="sound-icon" src="${isSoundOn ? soundOn : noSoundIcon}" class="alert-icon w-[24px] h-[24px] mb-[5px]"> 
+             
+             <div id="toggle-sound" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" 
+                  data-state="${isSoundOn ? 'on' : 'off'}" 
+                  style="background: ${isSoundOn ? 'var(--toggle-alerts-on-bg)' : 'var(--toggle-alerts-off-bg)'}; transition: background 0.3s;">
+              <div class="w-[17px] h-[17px] rounded-full absolute" 
+                   style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isSoundOn ? '34px' : '1px'}; transition: left 0.3s;"></div>
               </div>
+            </div>
          </div>
          
-         <!-- Auto-restart (ввімкнений) -->
-         <div class="flex flex-col items-center">
-           
-             <p class="m-0" style="font-weight: 500; font-size: 13px; margin-right:5px; color: var(--text-primary);">Auto-restart</p>
-             <img id="restart-icon" src="${autoRestartOn}" class="alert-icon w-[24px] h-[24px] mb-[5px]">
+         <div class="flex flex-col items-center w-full">
+             <p class="m-0" style="font-weight: 500; margin-left: 10px ; font-size: 13px; color: var(--text-primary);">Auto-restart</p>
+             
+             <img id="restart-icon" src="${isRestartOn ? autoRestartOn : xRestartIcon}" class="alert-icon w-[24px] h-[24px] mb-[5px]">
           
-           <div id="toggle-restart" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" data-state="on" style="background: var(--toggle-restart-on-bg); transition: background 0.3s;">
-           <div class="w-[17px] h-[17px] rounded-full absolute" style="background: var(--toggle-alerts-thumb); top: 1px; left: 34px; transition: left 0.3s;"></div>
-           </div>
-         </div>
-       </div>
+             <div id="toggle-restart" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" 
+                  data-state="${isRestartOn ? 'on' : 'off'}" 
+                  style="background: ${isRestartOn ? 'var(--toggle-restart-on-bg)' : 'var(--toggle-restart-off-bg)'}; transition: background 0.3s;">
+               <div class="w-[17px] h-[17px] rounded-full absolute" 
+                    style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isRestartOn ? '34px' : '1px'}; transition: left 0.3s;"></div>
+             </div>
+         </div>     
+</div>
 </div>
      
      </div> 
@@ -114,7 +126,7 @@ function setupWorkIntervalButtons() {
         // 🔴 ФІКС: Додали async
         btn.onclick = async () => {
             const value = parseInt(btn.dataset.value || '20');
-            localStorage.setItem('workInterval', value.toString());
+            await chrome.storage.local.set({workInterval: value.toString()});
 
             // 🔴 ФІКС: Чекаємо запису в базу
             await timer.setDuration(value);
@@ -145,49 +157,36 @@ function setupToggleSwitches() {
 
     // ✅ Sound Toggle
     if (soundToggle) {
-        soundToggle.addEventListener('click', () => {
-            const state = soundToggle.getAttribute('data-state');
+        soundToggle.addEventListener('click', async () => {
             const thumb = soundToggle.querySelector<HTMLDivElement>('div');
 
             if (!thumb) return;
 
-            if (state === 'on') {
-                // Вимикаємо
-                soundToggle.setAttribute('data-state', 'off');
-                soundToggle.style.background = 'var(--toggle-alerts-off-bg)';
-                thumb.style.left = '1px';
-                // МІНЯЄМО ІКОНКУ НА ПЕРЕКРЕСЛЕНУ
-                if (soundIcon) soundIcon.src = noSoundIcon;
-            } else {
-                // Вмикаємо
-                soundToggle.setAttribute('data-state', 'on');
-                soundToggle.style.background = 'var(--toggle-alerts-on-bg)';
-                thumb.style.left = '34px';
-                // МІНЯЄМО ІКОНКУ НА НОРМАЛЬНУ
-                if (soundIcon) soundIcon.src = soundOn;
-            }
+            const isCurrentlyOn = soundToggle.getAttribute('data-state') === 'on';
+            const nextState = !isCurrentlyOn;
+            await chrome.storage.local.set({ alertSound: nextState });
+
+            soundToggle.setAttribute('data-state', nextState ? 'on' : 'off');
+            soundToggle.style.background = nextState ? 'var(--toggle-alerts-on-bg)' : 'var(--toggle-alerts-off-bg)';
+            thumb.style.left = nextState ? '34px' : '1px';
+            if (soundIcon) soundIcon.src = nextState ? soundOn : noSoundIcon;
         });
     }
 
     if (restartToggle) {
-        restartToggle.addEventListener('click', () => {
-            const state = restartToggle.getAttribute('data-state');
+        restartToggle.addEventListener('click', async () => {
             const thumb = restartToggle.querySelector<HTMLDivElement>('div');
-
             if (!thumb) return;
 
-            if (state === 'on') {
-                restartToggle.setAttribute('data-state', 'off');
-                restartToggle.style.background = 'var(--toggle-restart-off-bg)';
-                thumb.style.left = '1px';
-                if (restartIcon) restartIcon.src = xRestartIcon;
+            const isCurrentlyOn = restartToggle.getAttribute('data-state') === 'on';
+            const nextState = !isCurrentlyOn;
 
-            } else {
-                restartToggle.setAttribute('data-state', 'on');
-                restartToggle.style.background = 'var(--toggle-restart-on-bg)';
-                thumb.style.left = '34px';
-                if (restartIcon) restartIcon.src = autoRestartOn;
-            }
+            await chrome.storage.local.set({ autoRestart: nextState });
+
+            restartToggle.setAttribute('data-state', nextState ? 'on' : 'off');
+            restartToggle.style.background = nextState ? 'var(--toggle-restart-on-bg)' : 'var(--toggle-restart-off-bg)';
+            thumb.style.left = nextState ? '34px' : '1px';
+            if (restartIcon) restartIcon.src = nextState ? autoRestartOn : xRestartIcon;
         });
     }
 }

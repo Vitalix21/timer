@@ -83,8 +83,8 @@ html, body, #app {
     --toggle-alerts-pos: 32px;            /* Праворуч */
 
     /* Toggle для Auto-restart (вимкнений) */
-    --toggle-restart-on-bg: #FFFFFF;
-    --toggle-restart-off-bg: #BE9D9D;
+    --toggle-restart-on-bg: #BE9D9D;
+    --toggle-restart-off-bg: #FFFFFF;
     --toggle-restart-pos: 2px;            /* Ліворуч */
 
 }

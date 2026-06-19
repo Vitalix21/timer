@@ -3,6 +3,11 @@
   "name": "Eye Timer TS",
   "version": "1.0.0",
   "action": {
+    "default_icon":{
+      "16" : "public/eye-16-2.png",
+      "48" : "public/eye-48-2.png",
+      "128" : "public/eye-128-2.png"
+    },
     "default_popup": "index.html"
   },
   "description": "Pomodoro timer for eye health with break reminders",
@@ -16,6 +21,21 @@
       "js": ["src/popup/screens/breakScreen.ts"]
     }
   ],
-  "permissions": ["alarms", "notifications", "storage"]
+  "permissions": ["alarms", "notifications", "storage"],
+
+  "icons" : {
+    "16" : "public/eye-16-2.png",
+    "48" : "public/eye-48-2.png",
+    "128" : "public/eye-128-2.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "eye-timer-png.png",
+        "alarm.mp3"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 
 }

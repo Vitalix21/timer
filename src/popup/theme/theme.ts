@@ -55,7 +55,7 @@ export function setupResetBtn() {
 
         const icon = document.querySelector<HTMLImageElement>('#play-pause-icon');
         if (icon) {
-            icon.src = "../public/play.svg";
+            icon.src = playIconUrl;
         }
     }
 }

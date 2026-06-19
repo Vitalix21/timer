@@ -32,7 +32,7 @@ chrome.runtime.onInstalled.addListener(() => {
         endTime: null, // Поки таймер стоїть, часу закінчення немає
     };
 
-    chrome.storage.local.set({ timerState: initialState });
+    chrome.storage.local.set({ timerState: initialState,alertSound:true,autoRestart:true });
     console.log("timer state loaded");
 });
 
@@ -166,7 +166,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     }
 
     if (request.action === "SET_DURATION") {
-        const newTotalSeconds = request.minutes * 1;
+        const newTotalSeconds = request.minutes * 60;
 
         chrome.storage.local.get(["timerState"], (result) => {
             const state = result.timerState;
@@ -193,84 +193,108 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "timerEnd") {
         console.log("⏰ ЧАС ВИЙШОВ!");
 
-        chrome.storage.local.get(["timerState"], (result) => {
+        // ФІКС 1: Дістаємо і стан таймера, і стан тоглу авторестарту
+        chrome.storage.local.get(["timerState", "autoRestart"], (result) => {
             const state = result.timerState;
+            // Якщо тогла в базі ще немає, вважаємо його вимкненим для безпеки
+            const isAutoRestart = result.autoRestart === true;
+
             if (!isTimerState(state)) return;
 
-            // 1. Скидаємо стан у базі
-            state.currentTime = state.totalTime;
-            state.isRunning = false;
-            state.endTime = null;
-            chrome.storage.local.set({ timerState: state });
+            if (isAutoRestart) {
+                console.log("🔄 Авторестарт увімкнено! Запускаємо нове коло.");
+                // Скидаємо поточний час на старт, але залишаємо таймер увімкненим
+                state.currentTime = state.totalTime;
+                state.isRunning = true;
 
-            // 2. Сигнал попапу закритися
-            chrome.runtime.sendMessage({ action: "TIMER_FINISHED" }).catch(() => {});
+                // Рахуємо новий час завершення (від зараз + загальний час у мілісекундах)
+                const newEndTime = Date.now() + (state.totalTime * 1000);
+                state.endTime = newEndTime;
 
-            // 💡 ФУНКЦІЯ ПЛАНУ "Б"
+                // ФІКС 2: Створюємо НОВИЙ будильник на наступний період
+                chrome.alarms.create("timerEnd", { when: newEndTime });
+
+                chrome.storage.local.set({ timerState: state });
+            } else {
+                console.log("⏹ Авторестарт вимкнено. Просто зупиняємо.");
+                // Твоя стара логіка повної зупинки
+                state.currentTime = state.totalTime;
+                state.isRunning = false;
+                state.endTime = null;
+                chrome.storage.local.set({ timerState: state });
+            }
+
+            chrome.runtime.sendMessage({
+                action: "TIMER_FINISHED",
+                autoRestarted: isAutoRestart,
+                newState: state
+            }).catch(() => {});
+
+            // 💡 ФУНКЦІЯ ПЛАНУ "Б" (виклик системного сповіщення)
             const triggerFallback = () => {
-                console.log("📢 Викликаємо план Б: Сповіщення ОС");
-
-                // 🔴 ФІКС 1: Робимо ID унікальним, щоб Windows його не ігнорував!
                 const uniqueId = "timer-end-" + Date.now();
-
                 chrome.notifications.create(uniqueId, {
                     type: "basic",
-                    iconUrl: "/eye-timer-png.png",
+                    iconUrl: "eye-timer-png.png",
                     title: "Time's Up!",
-                    message: "Час зробити перерву!",
+                    message: isAutoRestart ? "Час вийшов! Наступне коло вже почалося 🔄" : "Час зробити перерву! ☕",
                     priority: 2
                 });
             };
 
-            // 🔴 ФІКС 2: Перевіряємо стан самого вікна браузера
-            chrome.windows.getLastFocused((win) => {
-                // Якщо вікно згорнуто (minimized) — одразу б'ємо системним сповіщенням
-                if (!win || win.state === "minimized") {
-                    console.log("Браузер згорнуто. Переходимо до Плану Б.");
+            // 🔴 ФІКС: Питаємо активну вкладку, чи може вона показати UI
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                // Якщо вікно згорнуто або немає активної вкладки - одразу План Б
+                if (tabs.length === 0 || !tabs[0].id) {
                     triggerFallback();
                     return;
                 }
 
-                // Якщо вікно відкрите на екрані, шукаємо в ньому активну вкладку
-                chrome.tabs.query({ active: true, windowId: win.id }, (tabs) => {
-                    const activeTab = tabs[0];
+                const activeTab = tabs[0];
 
-                    // Якщо це якась дивна вкладка (без ID)
-                    if (!activeTab || !activeTab.id) {
+                // Якщо це гарантовано заборонена сторінка Google - одразу План Б
+                if (activeTab.url && (activeTab.url.startsWith("chrome://") || activeTab.url.startsWith("edge://") || activeTab.url.includes("chrome.google.com/webstore"))) {
+                    triggerFallback();
+                    return;
+                }
+
+                // Інакше пробуємо достукатися до content script (План А)
+                // 🔴 ФІКС: Питаємо активну вкладку, чи може вона показати UI
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    if (tabs.length === 0) {
                         triggerFallback();
-                    }else{
-                        chrome.tabs.sendMessage(activeTab.id, { action: "SHOW_BREAK_SCREEN" }, (response) => {
-                            // Якщо скрипта немає (chrome://newtab) або він повернув помилку
-                            if (chrome.runtime.lastError || !response || !response.success) {
-                                console.log("❌ Скрипт не відповів (можливо системна сторінка).");
-                                triggerFallback();
-                            } else {
-                                console.log("✅ Віджет успішно намальовано на сайті!");
-                            }
-                        });
+                        return;
                     }
 
-                    chrome.storage.local.get(['autoRestart'], (result) => {
-                        if (result.autoRestart === true) {
-                            console.log("Auto-restart is ON. Restarting...");
-                            // Одразу перезапускаємо таймер напряму в базі
-                            state.currentTime = state.totalTime;
-                            state.isRunning = true;
-                            state.endTime = Date.now() + (state.totalTime * 1000);
+                    const activeTab = tabs[0];
 
-                            chrome.storage.local.set({ timerState: state });
-                            chrome.alarms.create("timerEnd", { when: state.endTime });
-                            chrome.runtime.sendMessage({action:"TIMER_UPDATED"}).catch(() => {});
+                    // ФІКС TS2769: Явно перевіряємо, чи є id. Тепер TS знає, що далі id - це точно number
+                    if (activeTab.id === undefined) {
+                        triggerFallback();
+                        return;
+                    }
+
+                    if (activeTab.url && (activeTab.url.startsWith("chrome://") || activeTab.url.startsWith("edge://") || activeTab.url.includes("chrome.google.com/webstore"))) {
+                        triggerFallback();
+                        return;
+                    }
+
+                    // ФІКС response: типізуємо як unknown і додаємо _ (underscore), щоб ESLint не сварився
+                    chrome.tabs.sendMessage(activeTab.id, {
+                        action: "SHOW_BREAK_SCREEN",
+                        autoRestarted: isAutoRestart
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    }, (_response: unknown) => {
+                        if (chrome.runtime.lastError) {
+                            console.warn("Content script недоступний, використовуємо Fallback:", chrome.runtime.lastError.message);
+                            triggerFallback();
                         } else {
-                            // Просто зупиняємо (як у тебе і було на початку)
-                            state.currentTime = state.totalTime;
-                            state.isRunning = false;
-                            state.endTime = null;
-                            chrome.storage.local.set({ timerState: state });
+                            console.log("Content script успішно показав UI!");
                         }
                     });
                 });
             });
+
         });
     }
 });
