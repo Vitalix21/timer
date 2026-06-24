@@ -1,24 +1,29 @@
 import { timer, UI } from "../theme/theme";
 import settingsIconUrl from "../../assets/settings-icon.svg";
-import doneIcon from "../../assets/done.svg"
-import eyeIcon from "../../assets/eye-icon.svg"
-import noSoundIcon from "../../assets/no-Sound-icon.svg"
-import xRestartIcon from "../../assets/x.svg"
-import autoRestartOn from "../../assets/auto-restart-on.svg"
-import soundOn from "../../assets/sound-on.svg"
-import moveToMainUIIcon from "../../assets/move-to-main-UI-icon.svg"
+import doneIcon from "../../assets/done.svg";
+import eyeIcon from "../../assets/eye-icon.svg";
+import noSoundIcon from "../../assets/no-Sound-icon.svg";
+import xRestartIcon from "../../assets/x.svg";
+import autoRestartOn from "../../assets/auto-restart-on.svg";
+import soundOn from "../../assets/sound-on.svg";
+import moveToMainUIIcon from "../../assets/move-to-main-UI-icon.svg";
 
-export async function renderSettingsScreen(onNavigate: (screen: 'main') => void): Promise<void> {
-    const app = document.querySelector<HTMLDivElement>("#app");
-    if (!app) return;
+export async function renderSettingsScreen(
+  onNavigate: (screen: "main") => void,
+): Promise<void> {
+  const app = document.querySelector<HTMLDivElement>("#app");
+  if (!app) return;
 
-    const storage = await chrome.storage.local.get({workInterval:"20",alertSound:"on",autoRestart: "on"})
-    const savedInterval = String(storage.workInterval);
-    const isSoundOn = storage.alertSound;
-    const isRestartOn = storage.autoRestart;
+  const storage = await chrome.storage.local.get({
+    workInterval: "20",
+    alertSound: "on",
+    autoRestart: "on",
+  });
+  const savedInterval = String(storage.workInterval);
+  const isSoundOn = storage.alertSound;
+  const isRestartOn = storage.autoRestart;
 
-
-    app.innerHTML = `
+  app.innerHTML = `
    <div class="${UI.uiWrapper} flex flex-col h-[500px] overflow-hidden">
      <!-- Header -->
      <div class="w-full flex items-center justify-between px-6 mt-[25px] shrink-0 mb-[30px]">
@@ -38,10 +43,10 @@ export async function renderSettingsScreen(onNavigate: (screen: 'main') => void)
            </div>
            
            <div class="flex flex-col gap-[8px]">
-             ${generateIntervalButton('20', savedInterval)}
-             ${generateIntervalButton('30', savedInterval)}
-             ${generateIntervalButton('45', savedInterval)}
-             ${generateIntervalButton('60', savedInterval)}
+             ${generateIntervalButton("20", savedInterval)}
+             ${generateIntervalButton("30", savedInterval)}
+             ${generateIntervalButton("45", savedInterval)}
+             ${generateIntervalButton("60", savedInterval)}
            </div>
            
        </div> 
@@ -60,10 +65,10 @@ export async function renderSettingsScreen(onNavigate: (screen: 'main') => void)
              <img id="sound-icon" src="${isSoundOn ? soundOn : noSoundIcon}" class="alert-icon w-[24px] h-[24px] mb-[5px]"> 
              
              <div id="toggle-sound" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" 
-                  data-state="${isSoundOn ? 'on' : 'off'}" 
-                  style="background: ${isSoundOn ? 'var(--toggle-alerts-on-bg)' : 'var(--toggle-alerts-off-bg)'}; transition: background 0.3s;">
+                  data-state="${isSoundOn ? "on" : "off"}" 
+                  style="background: ${isSoundOn ? "var(--toggle-alerts-on-bg)" : "var(--toggle-alerts-off-bg)"}; transition: background 0.3s;">
               <div class="w-[17px] h-[17px] rounded-full absolute" 
-                   style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isSoundOn ? '34px' : '1px'}; transition: left 0.3s;"></div>
+                   style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isSoundOn ? "34px" : "1px"}; transition: left 0.3s;"></div>
               </div>
             </div>
          </div>
@@ -74,10 +79,10 @@ export async function renderSettingsScreen(onNavigate: (screen: 'main') => void)
              <img id="restart-icon" src="${isRestartOn ? autoRestartOn : xRestartIcon}" class="alert-icon w-[24px] h-[24px] mb-[5px]">
           
              <div id="toggle-restart" class="w-[52px] h-[19px] rounded-[25px] cursor-pointer relative" 
-                  data-state="${isRestartOn ? 'on' : 'off'}" 
-                  style="background: ${isRestartOn ? 'var(--toggle-restart-on-bg)' : 'var(--toggle-restart-off-bg)'}; transition: background 0.3s;">
+                  data-state="${isRestartOn ? "on" : "off"}" 
+                  style="background: ${isRestartOn ? "var(--toggle-restart-on-bg)" : "var(--toggle-restart-off-bg)"}; transition: background 0.3s;">
                <div class="w-[17px] h-[17px] rounded-full absolute" 
-                    style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isRestartOn ? '34px' : '1px'}; transition: left 0.3s;"></div>
+                    style="background: var(--toggle-alerts-thumb); top: 1px; left: ${isRestartOn ? "34px" : "1px"}; transition: left 0.3s;"></div>
              </div>
          </div>     
 </div>
@@ -97,21 +102,25 @@ export async function renderSettingsScreen(onNavigate: (screen: 'main') => void)
      
    </div>
 `;
-    setupWorkIntervalButtons();
-    setupToggleSwitches();
+  setupWorkIntervalButtons();
+  setupToggleSwitches();
 
-    const backBtn = document.querySelector<HTMLButtonElement>('#back-btn');
-    if (backBtn) {
-        backBtn.onclick = () => onNavigate('main');
-    }
+  const backBtn = document.querySelector<HTMLButtonElement>("#back-btn");
+  if (backBtn) {
+    backBtn.onclick = () => onNavigate("main");
+  }
 }
 
 function generateIntervalButton(value: string, selected: string): string {
-    const isSelected = value === selected;
-    const checkmark = isSelected ? `<img src="${doneIcon}" class="checkmark w-[20px] h-[20px] absolute right-[10px]"/>` : '';
-    const bgStyle = isSelected ? 'background: var(--interval-selected-bg);' : 'background: var(--interval-default-bg);';
+  const isSelected = value === selected;
+  const checkmark = isSelected
+    ? `<img src="${doneIcon}" class="checkmark w-[20px] h-[20px] absolute right-[10px]"/>`
+    : "";
+  const bgStyle = isSelected
+    ? "background: var(--interval-selected-bg);"
+    : "background: var(--interval-default-bg);";
 
-    return `
+  return `
         <button class="work-interval-btn w-[120px] h-[35px] flex items-center justify-center relative rounded-full cursor-pointer border-none" data-value="${value}" style="${bgStyle}">
         <span class="text-[#000000]" style="font-weight: 600;">${value}:00</span>
         ${checkmark}
@@ -120,73 +129,80 @@ function generateIntervalButton(value: string, selected: string): string {
 }
 
 function setupWorkIntervalButtons() {
-    const btns = document.querySelectorAll<HTMLButtonElement>('.work-interval-btn');
+  const btns =
+    document.querySelectorAll<HTMLButtonElement>(".work-interval-btn");
 
-    btns.forEach(btn => {
-        // 🔴 ФІКС: Додали async
-        btn.onclick = async () => {
-            const value = parseInt(btn.dataset.value || '20');
-            await chrome.storage.local.set({workInterval: value.toString()});
+  btns.forEach((btn) => {
+    // 🔴 ФІКС: Додали async
+    btn.onclick = async () => {
+      const value = parseInt(btn.dataset.value || "20");
+      await chrome.storage.local.set({ workInterval: value.toString() });
 
-            // 🔴 ФІКС: Чекаємо запису в базу
-            await timer.setDuration(value);
+      // 🔴 ФІКС: Чекаємо запису в базу
+      await timer.setDuration(value);
 
-            // Оновлюємо UI кнопок
-            btns.forEach(b => {
-                b.style.background = 'var(--interval-default-bg)';
-                const existingCheckmark = b.querySelector('img.checkmark');
-                if (existingCheckmark) existingCheckmark.remove();
-            });
+      // Оновлюємо UI кнопок
+      btns.forEach((b) => {
+        b.style.background = "var(--interval-default-bg)";
+        const existingCheckmark = b.querySelector("img.checkmark");
+        if (existingCheckmark) existingCheckmark.remove();
+      });
 
-            btn.style.background = 'var(--interval-selected-bg)';
-            const checkmark = document.createElement('img');
-            // Переконайся, що doneIcon імпортовано зверху файлу!
-            checkmark.src = doneIcon;
-            checkmark.className = 'checkmark w-[20px] h-[20px] absolute right-[10px]';
-            btn.appendChild(checkmark);
-        };
-    });
+      btn.style.background = "var(--interval-selected-bg)";
+      const checkmark = document.createElement("img");
+      // Переконайся, що doneIcon імпортовано зверху файлу!
+      checkmark.src = doneIcon;
+      checkmark.className = "checkmark w-[20px] h-[20px] absolute right-[10px]";
+      btn.appendChild(checkmark);
+    };
+  });
 }
 
 function setupToggleSwitches() {
-    const soundToggle = document.querySelector<HTMLDivElement>('#toggle-sound');
-    const restartToggle = document.querySelector<HTMLDivElement>('#toggle-restart');
+  const soundToggle = document.querySelector<HTMLDivElement>("#toggle-sound");
+  const restartToggle =
+    document.querySelector<HTMLDivElement>("#toggle-restart");
 
-    const soundIcon = document.querySelector<HTMLImageElement>('#sound-icon');
-    const restartIcon = document.querySelector<HTMLImageElement>('#restart-icon');
+  const soundIcon = document.querySelector<HTMLImageElement>("#sound-icon");
+  const restartIcon = document.querySelector<HTMLImageElement>("#restart-icon");
 
-    // ✅ Sound Toggle
-    if (soundToggle) {
-        soundToggle.addEventListener('click', async () => {
-            const thumb = soundToggle.querySelector<HTMLDivElement>('div');
+  // ✅ Sound Toggle
+  if (soundToggle) {
+    soundToggle.addEventListener("click", async () => {
+      const thumb = soundToggle.querySelector<HTMLDivElement>("div");
 
-            if (!thumb) return;
+      if (!thumb) return;
 
-            const isCurrentlyOn = soundToggle.getAttribute('data-state') === 'on';
-            const nextState = !isCurrentlyOn;
-            await chrome.storage.local.set({ alertSound: nextState });
+      const isCurrentlyOn = soundToggle.getAttribute("data-state") === "on";
+      const nextState = !isCurrentlyOn;
+      await chrome.storage.local.set({ alertSound: nextState });
 
-            soundToggle.setAttribute('data-state', nextState ? 'on' : 'off');
-            soundToggle.style.background = nextState ? 'var(--toggle-alerts-on-bg)' : 'var(--toggle-alerts-off-bg)';
-            thumb.style.left = nextState ? '34px' : '1px';
-            if (soundIcon) soundIcon.src = nextState ? soundOn : noSoundIcon;
-        });
-    }
+      soundToggle.setAttribute("data-state", nextState ? "on" : "off");
+      soundToggle.style.background = nextState
+        ? "var(--toggle-alerts-on-bg)"
+        : "var(--toggle-alerts-off-bg)";
+      thumb.style.left = nextState ? "34px" : "1px";
+      if (soundIcon) soundIcon.src = nextState ? soundOn : noSoundIcon;
+    });
+  }
 
-    if (restartToggle) {
-        restartToggle.addEventListener('click', async () => {
-            const thumb = restartToggle.querySelector<HTMLDivElement>('div');
-            if (!thumb) return;
+  if (restartToggle) {
+    restartToggle.addEventListener("click", async () => {
+      const thumb = restartToggle.querySelector<HTMLDivElement>("div");
+      if (!thumb) return;
 
-            const isCurrentlyOn = restartToggle.getAttribute('data-state') === 'on';
-            const nextState = !isCurrentlyOn;
+      const isCurrentlyOn = restartToggle.getAttribute("data-state") === "on";
+      const nextState = !isCurrentlyOn;
 
-            await chrome.storage.local.set({ autoRestart: nextState });
+      await chrome.storage.local.set({ autoRestart: nextState });
 
-            restartToggle.setAttribute('data-state', nextState ? 'on' : 'off');
-            restartToggle.style.background = nextState ? 'var(--toggle-restart-on-bg)' : 'var(--toggle-restart-off-bg)';
-            thumb.style.left = nextState ? '34px' : '1px';
-            if (restartIcon) restartIcon.src = nextState ? autoRestartOn : xRestartIcon;
-        });
-    }
+      restartToggle.setAttribute("data-state", nextState ? "on" : "off");
+      restartToggle.style.background = nextState
+        ? "var(--toggle-restart-on-bg)"
+        : "var(--toggle-restart-off-bg)";
+      thumb.style.left = nextState ? "34px" : "1px";
+      if (restartIcon)
+        restartIcon.src = nextState ? autoRestartOn : xRestartIcon;
+    });
+  }
 }

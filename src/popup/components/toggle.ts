@@ -1,12 +1,11 @@
 import { toggleTheme } from "../theme/theme";
 
 export function setupToggle() {
-    const toggle = document.querySelector<HTMLDivElement>("#toggle-switch");
+  const toggle = document.querySelector<HTMLDivElement>("#toggle-switch");
 
-    if (!toggle) return;
+  if (!toggle) return;
 
-    toggle.onclick = () => {
-        toggleTheme();
-
-    };
+  toggle.onclick = () => {
+    toggleTheme();
+  };
 }

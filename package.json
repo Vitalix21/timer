@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prettier": "prettier --write \"src/**/*.{js,ts,jsx,tsx,vue,html,css}\""
+
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.33",
@@ -25,5 +27,8 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.54.0",
     "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "prettier": "^3.8.4"
   }
 }
