@@ -3,8 +3,7 @@
     "target": "ES2022",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@icons/*": ["src/public/*"]
+      "@/*": ["src/*"]
     },
     "useDefineForClassFields": true,
     "module": "ESNext",

@@ -3,22 +3,26 @@ import pauseIconUrl from "../../assets/pause.svg";
 import eyeIconUrl from "../../assets/eye-icon.svg";
 import resetIconUrl from "../../assets/timer-reset.svg";
 import backIconUrl from "../../assets/back-item.svg";
-import { setupPlayPause, setupResetBtn, timer, UI, updateTicks } from "../theme/theme.ts";
+import {
+  setupPlayPause,
+  setupResetBtn,
+  timer,
+  UI,
+  updateTicks,
+} from "../theme/theme.ts";
 import { setupToggle } from "../components/toggle.ts";
 
-export async function renderMainUi(onNavigate: (screen: 'settings') => void) {
+export async function renderMainUi(onNavigate: (screen: "settings") => void) {
+  const app = document.querySelector<HTMLDivElement>("#app");
+  if (!app) return;
 
-    const app = document.querySelector<HTMLDivElement>("#app");
-    if (!app) return;
+  const isRunning = await timer.getIsRunning();
 
+  const formattedTime = await timer.formatTime();
 
-    const isRunning = await timer.getIsRunning();
+  const iconSrc = isRunning ? pauseIconUrl : playIconUrl;
 
-    const formattedTime = await timer.formatTime();
-
-    const iconSrc = isRunning ? pauseIconUrl : playIconUrl;
-
-    app.innerHTML = `
+  app.innerHTML = `
        <div class="${UI.uiWrapper}">
          <div class="text-center">
          <h1 class="text-xl text-[var(--text-primary)]" style="font-weight: 500">CountDown</h1>
@@ -70,30 +74,32 @@ export async function renderMainUi(onNavigate: (screen: 'settings') => void) {
         <p style="font-weight:600; font-size: 10px; color:#FFFFFF">Settings</p>
         </button>
        </div>
-    `
-    setupPlayPause();
-    setupToggle();
-    setupResetBtn();
+    `;
+  setupPlayPause();
+  setupToggle();
+  setupResetBtn();
 
-    // ✅ Початкове малювання стрілочок при відкритті попапу
-    await updateTicks();
+  // ✅ Початкове малювання стрілочок при відкритті попапу
+  await updateTicks();
 
-    const displayElement = document.querySelector<HTMLSpanElement>("#timer-display");
+  const displayElement =
+    document.querySelector<HTMLSpanElement>("#timer-display");
 
-    if (displayElement) {
-        timer.onTickCallback(async () => {
-            // Оновлюємо цифри
-            const newTime = await timer.formatTime();
-            displayElement.innerText = newTime;
+  if (displayElement) {
+    timer.onTickCallback(async () => {
+      // Оновлюємо цифри
+      const newTime = await timer.formatTime();
+      displayElement.innerText = newTime;
 
-            // Оновлюємо рисочки щосекунди
-            await updateTicks();
-        });
-    }
+      // Оновлюємо рисочки щосекунди
+      await updateTicks();
+    });
+  }
 
-    const settingsBtn = document.querySelector<HTMLButtonElement>('#settings-btn');
+  const settingsBtn =
+    document.querySelector<HTMLButtonElement>("#settings-btn");
 
-    if (settingsBtn) {
-        settingsBtn.onclick = () => onNavigate('settings');
-    }
+  if (settingsBtn) {
+    settingsBtn.onclick = () => onNavigate("settings");
+  }
 }

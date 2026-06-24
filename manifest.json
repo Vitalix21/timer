@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Eye Timer TS",
+  "name": "Eye Timer",
   "version": "1.0.0",
   "action": {
     "default_icon":{
       "16" : "public/eye-16-2.png",
       "48" : "public/eye-48-2.png",
-      "128" : "public/eye-128-2.png"
+      "128" : "public/128-eye.png"
     },
     "default_popup": "index.html"
   },
@@ -26,7 +26,7 @@
   "icons" : {
     "16" : "public/eye-16-2.png",
     "48" : "public/eye-48-2.png",
-    "128" : "public/eye-128-2.png"
+    "128" : "public/128-eye.png"
   },
   "web_accessible_resources": [
     {
