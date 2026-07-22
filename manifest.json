@@ -1,41 +1,37 @@
 {
-  "manifest_version": 3,
-  "name": "Eye Timer",
-  "version": "1.0.0",
-  "action": {
-    "default_icon":{
-      "16" : "public/eye-16-2.png",
-      "48" : "public/eye-48-2.png",
-      "128" : "public/128-eye.png"
-    },
-    "default_popup": "index.html"
-  },
-  "description": "Pomodoro timer for eye health with break reminders",
-  "background": {
-    "service_worker": "src/background/service-worker.ts",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["src/popup/screens/breakScreen.ts"]
-    }
-  ],
-  "permissions": ["alarms", "notifications", "storage"],
+	"manifest_version": 3,
+	"name": "Eye Timer",
+	"version": "1.0.0",
+	"action": {
+		"default_icon": {
+			"16": "public/eye-16-2.png",
+			"48": "public/eye-48-2.png",
+			"128": "public/128-eye.png"
+		},
+		"default_popup": "index.html"
+	},
+	"description": "Eye Timer helps protect your eyes with the 20-20-20 rule. When your work timer ends, a break reminder overlay appears on your current page with a 20-second countdown. Includes sound alerts and auto-restart options.",
+	"background": {
+		"service_worker": "src/background/service-worker.ts",
+		"type": "module"
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["src/content-scripts/breakScreen.ts"]
+		}
+	],
+	"permissions": ["alarms", "notifications", "storage", "tabs"],
 
-  "icons" : {
-    "16" : "public/eye-16-2.png",
-    "48" : "public/eye-48-2.png",
-    "128" : "public/128-eye.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "eye-timer-png.png",
-        "alarm.mp3"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ]
-
+	"icons": {
+		"16": "public/eye-16-2.png",
+		"48": "public/eye-48-2.png",
+		"128": "public/128-eye.png"
+	},
+	"web_accessible_resources": [
+		{
+			"resources": ["eye-timer-png.png", "alarm.mp3"],
+			"matches": ["<all_urls>"]
+		}
+	]
 }
